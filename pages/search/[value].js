@@ -63,7 +63,7 @@ export default function Page() {
       }
     })
 
-  }, [router.isReady])
+  }, [router.isReady, router.query])
 
   if (noKey && completed) {
     return (

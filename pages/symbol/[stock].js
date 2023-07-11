@@ -147,7 +147,7 @@ export default function Page() {
         }
     })
 
-  }, [router.isReady])
+  }, [router.isReady, router.query])
 
   const buyStock = (e) => {
     e.preventDefault();
