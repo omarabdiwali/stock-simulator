@@ -36,14 +36,6 @@ export default function Page() {
     let search = router.query.value;
     setCurValue(`'${search}'`);
 
-    search = encodeURIComponent(search);
-    search = search.replace(/%20/g, "+");
-    
-    history.replaceState({}, "Title", `/search/${search}`);
-    
-    search = search.replace(/\+/g, " ");
-    search = decodeURIComponent(search);
-
     search = search.replace(/\\/g, String.raw`\\`);
 
     getKey().then(verified => {
