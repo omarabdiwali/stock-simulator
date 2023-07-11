@@ -123,11 +123,11 @@ export default function Stock({ symbol, desc }) {
         <div className="flex h-10 space-x-3 text-sm font-medium">
           <div className="flex-auto flex space-x-3">
             <button disabled={disabled} className="w-full disabled:opacity-60 hover:bg-slate-600 h-10 flex-1 items-center justify-center rounded-md bg-black text-white" type="submit" onClick={!buy ? getSymbolData : buyStock}>Buy now</button>
-            <Link className="flex-1" href={`/symbol/${symbol}`}>
+            <a className="flex-1" href={`/symbol/${symbol}`}>
               <div className="w-full flex h-full disabled:opacity-60 hover:bg-slate-600 h-10 items-center justify-center rounded-md bg-black text-white">
                 <div className="m-auto">Chart</div>
               </div>
-            </Link>
+            </a>
           </div>
         </div>
       </form>
