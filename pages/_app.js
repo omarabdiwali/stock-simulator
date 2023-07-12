@@ -8,6 +8,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
     <SnackbarProvider>
       <SessionProvider session={session}>
         <Head>
+          <title>Stonks</title>
           <link rel="shortcut icon" href="/images/favicon.ico" />
         </Head>
         <Component {...pageProps} />

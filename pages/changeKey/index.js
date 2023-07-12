@@ -1,5 +1,6 @@
 import GetKey from "@/components/getKey";
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { useEffect, useState } from "react";
 
 export default function Page() {
@@ -18,6 +19,9 @@ export default function Page() {
 
   return (
     <>
+      <Head>
+        <title>API Key | Stonks</title>
+      </Head>
       {loaded ? <GetKey /> : ""}
     </>
   )
