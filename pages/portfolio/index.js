@@ -27,12 +27,15 @@ export default function Page() {
   let spent = 0;
   let current = 0;
 
-  const sortingOrder = (stock, stock1) => {
+  const sortingOrder = (stock, stock1, name = null, name1 = null) => {
     if (stock > stock1) {
       return 1;
     } else if (stock1 > stock) {
       return -1;
     } else {
+      if (name) {
+        return (name > name1 ? 1 : -1);
+      }
       return 0;
     }
   }
@@ -122,17 +125,19 @@ export default function Page() {
       if (e.target.value === "Symbol") {
         return sortingOrder(stock.stock, stock1.stock);
       } else if (e.target.value === "Date") {
-        return sortingOrder(stock1.date, stock.date);
-      } else if (e.target.value === "Amount") {
-        return sortingOrder(stock1.amount, stock.amount);
+        return sortingOrder(stock1.date, stock.date, stock.stock, stock1.stock);
+      } else if (e.target.value === "Purchase Amount") {
+        return sortingOrder(stock1.amount, stock.amount, stock.stock, stock1.stock);
+      } else if (e.target.value === "Company Amount") {
+        return sortingOrder(stockAmount[stock1.stock], stockAmount[stock.stock], stock.stock, stock1.stock);
       } else if (e.target.value === "Purchase") {
-        return sortingOrder(stock1.purPrice, stock.purPrice);
+        return sortingOrder(stock1.purPrice, stock.purPrice, stock.stock, stock1.stock);
       } else if (e.target.value === "Current") {
-        return sortingOrder(stock1.curPrice, stock.curPrice);
+        return sortingOrder(stock1.curPrice, stock.curPrice, stock.stock, stock1.stock);
       } else if (e.target.value === "Profit") {
-        return sortingOrder(stock1.profit, stock.profit);
+        return sortingOrder(stock1.profit, stock.profit, stock.stock, stock1.stock);
       } else {
-        return sortingOrder(stock1.amount * stock1.purPrice, stock.amount * stock1.purPrice);
+        return sortingOrder(stock1.amount * stock1.purPrice, stock.amount * stock.purPrice, stock.stock, stock1.stock);
       }
     })
 
@@ -192,7 +197,8 @@ export default function Page() {
             <select value={sortBy} onChange={changeSort} className="text-white text-sm bg-black focus:outline-none">
               <option value={"Symbol"}>Symbol</option>
               <option value={"Date"}>Date</option>
-              <option value={"Amount"}>Amount</option>
+              <option value={"Purchase Amount"}>Amount by Purchase</option>
+              <option value={"Company Amount"}>Amount by Company</option>
               <option value={"Purchase"}>Purchase Price</option>
               <option value={"Current"}>Current Price</option>
               <option value={"Profit"}>Profit</option>
