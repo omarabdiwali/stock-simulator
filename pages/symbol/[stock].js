@@ -114,12 +114,12 @@ export default function Page() {
       }
 
       else {
-        const todayPrices = await currentPrices(symbol, key);
-        setMax(Math.round(cash / todayPrices['c']));
-        setCurrent(todayPrices['c']);
-        setPrevClose(todayPrices['pc']);
-
         await Promise.all(closePrices.map((close, i) => {
+          if (i == closePrices.length - 1) {
+            setMax(Math.floor(cash / close));
+            setCurrent(close);
+            setPrevClose(closePrices[i - 1]);
+          }
           const item = {
             x: new Date(time[i] * 1000),
             y: [openPrices[i].toFixed(2), highPrice[i].toFixed(2), lowPrice[i].toFixed(2), close.toFixed(2)]
