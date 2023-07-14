@@ -91,13 +91,6 @@ export default function Page() {
         .then(res => res.json()).then(data => { return data; }).catch(err => console.error(err));
     }
 
-    const currentPrices = async (symbol, key) => {
-      return await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${key}`)
-        .then(resp => resp.json())
-        .then(data => { return data })
-        .catch(err => console.error(err));
-    }
-
     const readValues = async (symbol, key, cash) => {      
       const stockData = await getValues(symbol, key);
       let option = [];

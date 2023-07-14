@@ -27,16 +27,13 @@ export default function Page() {
   let spent = 0;
   let current = 0;
 
-  const sortingOrder = (stock, stock1, name = null, name1 = null) => {
+  const sortingOrder = (stock, stock1, value = null, value1 = null) => {
     if (stock > stock1) {
       return 1;
     } else if (stock1 > stock) {
       return -1;
     } else {
-      if (name) {
-        return (name > name1 ? 1 : -1);
-      }
-      return 0;
+      return (value > value1 ? 1 : -1);
     }
   }
 
@@ -123,7 +120,7 @@ export default function Page() {
 
     prevStocks.sort((stock, stock1) => {
       if (e.target.value === "Symbol") {
-        return sortingOrder(stock.stock, stock1.stock);
+        return sortingOrder(stock.stock, stock1.stock, stock.date, stock1.date);
       } else if (e.target.value === "Date") {
         return sortingOrder(stock1.date, stock.date, stock.stock, stock1.stock);
       } else if (e.target.value === "Purchase Amount") {
