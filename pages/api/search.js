@@ -27,7 +27,6 @@ export default async function handler(req, res) {
       
       if (symbol.indexOf(value) > -1 || company.indexOf(value) > -1) {
         if (csvData.length < 30 && symbol.indexOf('^') == -1) {
-          console.log(row);
           csvData.push(row);
         }
       }
