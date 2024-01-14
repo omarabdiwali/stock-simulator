@@ -82,6 +82,7 @@ export default function Page() {
           <div className="flex justify-center space-y-3 m-auto flex-wrap">
             <div></div>
             {stocks.map((stock, i) => {
+              console.log(stock);
               return <Stock key={i} desc={stock[1]} symbol={stock[0]} />
             })}
           </div>

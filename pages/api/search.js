@@ -14,9 +14,7 @@ export default async function handler(req, res) {
 
   const { search } = JSON.parse(req.body);
   let csvData = [];
-
   let file = process.cwd() + `/public/files/nasdaqSymbols.csv`;
-
   const reader = fs.createReadStream(file).pipe(parse({ delimiter: ',', fromLine: 2 }));
 
   await new Promise(resolve => {

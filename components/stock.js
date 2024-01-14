@@ -9,40 +9,34 @@ export default function Stock({ symbol, desc }) {
   const [buy, setBuy] = useState(false);
   const [price, setPrice] = useState();
   const [prevClose, setPrevClose] = useState();
-  const [cash, setCash] = useState(0);
   const [max, setMax] = useState(0);
-  const [apiKey, setApiKey] = useState("");
-  
-  const getSymbolData = async (e) => {
+
+  const getSymbolData = (e) => {
     e.preventDefault();
     setDisabled(true);
-    const getPrices = async (symbol) => {
-      return await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
-        .then(resp => resp.json())
-        .then(data => { return data })
-        .catch(err => console.error(err));
-    }
-    let pricesData = await getPrices(symbol);
-    setPrice(pricesData['c']);
-    setPrevClose(pricesData['pc']);
-    setMax(Math.floor(cash / pricesData['c']));
-    setDisabled(false);
-    setBuy(true);
+    fetch('/api/price', {
+      method: "POST",
+      body: JSON.stringify({ stock: symbol })
+    }).then(res => res.json()).then(data => {
+      setPrice(data.price);
+      setPrevClose(data.previous);
+      setMax(Math.floor(data.cash / data.previous));
+      setDisabled(false);
+      setBuy(true)
+    })
   }
   
   useEffect(() => {
     if (status === "loading") return;
-    
     if (status === "unauthenticated") {
       window.location.href = "/";
       return;
     }
+    
     fetch('/api/stocks/get').then(res => res.json()).then(data => {
       if (data.error) {
         window.location.href = "/";
       } else {
-        setApiKey(data.apiKey);
-        setCash(data.cash);
         setDisabled(false);
       }
     }).catch(err => console.error(err));
@@ -89,7 +83,6 @@ export default function Stock({ symbol, desc }) {
       setMax(Math.floor(data.cash / data.price));
       setPrice(data.price);
       setAmount("");
-      setCash(data.cash);
       setDisabled(false);
     }).catch(err => console.error(err));
   }

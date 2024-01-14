@@ -21,16 +21,15 @@ export default async function handler(req, res) {
     return;
   }
 
-
   const { key } = JSON.parse(req.body);
   const profile = session.user;
-  let query = { email: profile.email };
-
   await dbConnect();
+
+  let query = { email: profile.email };
   let user = await Users.findOne(query);
 
   if (user) {
-    let keyValue = key == "public" ? process.env.PUBLIC_KEY : key;
+    let keyValue = key.toLowerCase() == "public" ? process.env.PUBLIC_KEY : key;
     
     if (user.apiKey == keyValue) {
       res.status(200).json({ type: "info", answer: "Value has not changed." })

@@ -7,7 +7,6 @@ import Head from "next/head";
 
 export default function Home() {
   const { data: _, status } = useSession();
-
   const [assets, setAssets] = useState(0);
   const [cash, setCash] = useState(0);
   const [loaded, setLoaded] = useState(false);
@@ -15,29 +14,29 @@ export default function Home() {
 
   useEffect(() => {
     if (status === "loading") return;
-
     if (status === "unauthenticated") {
       setLoaded(true);
       return;
     }
 
-    const getPrices = async (stock, key) => {
-      return await fetch(`https://finnhub.io/api/v1/quote?symbol=${stock.stock}&token=${key}`)
-        .then(resp => resp.json())
-        .then(data => { return data })
+    const getPrices = async (stock) => {
+      return await fetch("/api/price", {
+        method: "POST",
+        body: JSON.stringify({ stock: stock.stock })
+      }).then(res => res.json()).then(data => { return data; })
         .catch(err => console.error(err));
     }
 
-    const getAssetPrices = async (stocks, key) => {
+    const getAssetPrices = async (stocks) => {
       let assets = 0;
       let uniqStocks = {};
       let repStocks = [];
 
       await Promise.all(stocks.map(async (stock, _) => {
         const getData = async (stock) => {
-          const data = await getPrices(stock, key);
-          assets += stock.amount * data['c']
-          uniqStocks[stock.stock] = data['c']
+          const data = await getPrices(stock);
+          assets += stock.amount * data.price;
+          uniqStocks[stock.stock] = data.price;
         }
 
         if (!isNaN(uniqStocks[stock.stock])) {
@@ -60,13 +59,13 @@ export default function Home() {
 
     fetch('/api/stocks/get').then(res => res.json())
     .then(data => {
-      if (data.apiKey.length == 0) {
-        setNoKey(true);
-        setLoaded(true);
-      } else {
+      if (data.apiKey) {
         let stocks = data.stocks;
         setCash(data.cash);
-        getAssetPrices(stocks, data.apiKey);
+        getAssetPrices(stocks);
+      } else {
+        setNoKey(true);
+        setLoaded(true);
       }
     }).catch(err => console.error(err));
   }, [status])

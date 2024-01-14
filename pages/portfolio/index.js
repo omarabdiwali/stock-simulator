@@ -44,14 +44,15 @@ export default function Page() {
       return;
     }
 
-    const getPrices = async (stock, key) => {
-      return await fetch(`https://finnhub.io/api/v1/quote?symbol=${stock.stock}&token=${key}`)
-        .then(resp => resp.json())
-        .then(data => { return data })
+    const getPrices = async (stock) => {
+      return await fetch("/api/price", {
+        method: "POST",
+        body: JSON.stringify({ stock: stock.stock })
+      }).then(res => res.json()).then(data => { return data; })
         .catch(err => console.error(err));
     }
 
-    const getAssetPrices = async (stocks, key) => {
+    const getAssetPrices = async (stocks) => {
       let stockTableData = [];
       let repStocks = [];
       let uniqStocks = {};
@@ -59,16 +60,16 @@ export default function Page() {
 
       await Promise.all(stocks.map(async (stock, _) => {
         const getData = async (stock) => {
-          const data = await getPrices(stock, key);
+          const data = await getPrices(stock);
           
-          let assets = stock.amount * data['c'];
+          let assets = stock.amount * data.price;
           let prevTotal = stock.amount * stock.price;
           let total = assets - prevTotal;
-          let stockData = { stock: stock.stock, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: data['c'], profit: total };
+          let stockData = { stock: stock.stock, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: data.price, profit: total };
 
           amountStock[stock.stock] = stock.amount;
           stockTableData.push(stockData);
-          uniqStocks[stock.stock] = data['c']
+          uniqStocks[stock.stock] = data.price
         }
 
         if (!isNaN(uniqStocks[stock.stock])) {
@@ -97,18 +98,18 @@ export default function Page() {
     }
 
     fetch("api/stocks/get").then(res => res.json()).then(data => {
-      if (data.apiKey.length == 0) {
-        setNoKey(true);
-        setLoaded(true);
-      }
-      else {
+      if (data.apiKey) {
         let stocks = data.stocks;
-        getAssetPrices(stocks, data.apiKey).then(data => {
+        getAssetPrices(stocks).then(data => {
           data.sort((stock, stock1) => stock.stock > stock1.stock ? 1 : -1);
           setAllStocks(data);
           setShowingStocks(data);
           setLoaded(true);
         });
+      }
+      else {
+        setNoKey(true);
+        setLoaded(true);
       }
     }).catch(err => console.error(err));
 
@@ -161,7 +162,6 @@ export default function Page() {
   const reverseTable = () => {
     let prevStock = [...showingStocks];
     prevStock.reverse();
-
     setShowingStocks(prevStock);
   }
 
@@ -216,7 +216,7 @@ export default function Page() {
             </thead>
             <tbody className="bg-slate-200 dark:bg-slate-800">
               {showingStocks.map((stock, i) => {
-                let alreadyIn = prev === stock.stock;
+                // let alreadyIn = prev === stock.stock;
                 let positive = stock.profit >= 0;
                 
                 prev = stock.stock;
@@ -228,7 +228,8 @@ export default function Page() {
 
                 return (
                   <tr key={i}>
-                    <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? <a className="hover:underline" href={`/symbol/${stock.stock}`}>{stock.stock}</a> : ""}</td>
+                    {/* <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? <a className="hover:underline" href={`/symbol/${stock.stock}`}>{stock.stock}</a> : ""}</td> */}
+                    <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{stock.stock}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{stock.date.toLocaleString()}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{new Intl.NumberFormat('en-us', { style: "currency", currency: "USD" }).format(stock.purPrice)}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{new Intl.NumberFormat('en-us', { style: "currency", currency: "USD" }).format(stock.curPrice)}</td>

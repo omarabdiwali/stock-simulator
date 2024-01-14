@@ -22,8 +22,8 @@ export default function SellModal({ stocks, button, className }) {
     }
 
     setAmount(Number(amount));
-
     setDisabled(true);
+
     fetch("/api/stocks/sell", {
       method: "POST",
       body: JSON.stringify({ symbol: symbol, amount: amount })
@@ -34,7 +34,6 @@ export default function SellModal({ stocks, button, className }) {
         enqueueSnackbar(data.answer, { autoHideDuration: 3000, variant: data.type });
         setMax(data.amount);
         setDisabled(false);
-        
         setInterval(() => window.location.reload(), 1500);
       }
       else {
