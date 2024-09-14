@@ -2,26 +2,17 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]"
 import dbConnect from "@/utils/dbConnect";
 import Users from "@/models/Users";
+import { capitalizeFirstLetter, getCryptoPrice, getResponse, getStockPrice } from "@/utils/common";
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
-
-  const getPrice = async (symbol, key) => {
-    return await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${key}`)
-      .then(resp => resp.json())
-      .then(data => { return data })
-      .catch(err => {
-        console.error(err);
-        res.status(500).json({ type: "error", answer: "Error fetching price." });
-      });
-  }
 
   if (!session || !req.body) {
     res.redirect("/");
     return;
   }
 
-  const { stock, amount } = JSON.parse(req.body);
+  const { stock, kind, amount } = JSON.parse(req.body);
   const profile = session.user;
 
   let query = { email: profile.email };
@@ -34,17 +25,26 @@ export default async function handler(req, res) {
     return;
   }
 
-  let priceData = await getPrice(stock, user.apiKey);
-  const price = priceData['c'];
+  const response = `Bought ${new Intl.NumberFormat().format(amount)} ${capitalizeFirstLetter(stock)}${getResponse(amount, kind)}`;
+  let stockData;
+  let price;
 
-  let stockData = { stock: stock, price: price, amount: amount, date: new Date() };
+  if (kind == "crypto") {
+    let priceData = await getCryptoPrice(stock);
+    price = priceData[stock]['usd'];
+    stockData = { stock: stock, kind: "crypto", price: price, amount: amount, date: new Date() };
+  } else {
+    let priceData = await getStockPrice(stock, user.apiKey);
+    price = priceData['c'];
+    stockData = { stock: stock, kind: "stock", price: price, amount: amount, date: new Date() };
+  }
 
   if (user.cash > price * amount) {
     user.cash -= (price * amount);
     user.stocks.push(stockData);
     user.save();
 
-    res.status(200).json({ type: "success", price: price, cash: user.cash, answer: `Bought ${new Intl.NumberFormat().format(amount)} ${stock} ${amount > 1 ? "stocks" : "stock"}!` });
+    res.status(200).json({ type: "success", price: price, cash: user.cash, answer: response });
   }
   
   else {

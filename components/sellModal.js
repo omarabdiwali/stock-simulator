@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter, decimalAdjust } from "@/utils/common";
 import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react"
 
@@ -6,11 +7,13 @@ export default function SellModal({ stocks, button, className }) {
   const [open, setOpen] = useState(false);
   const [symbol, setSymbol] = useState("");
   const [amount, setAmount] = useState("");
+  const [kind, setKind] = useState("stock");
   const [max, setMax] = useState(0);
 
   useEffect(() => {
     let first = Object.keys(stocks)[0];
-    setMax(stocks[first]);
+    setMax(stocks[first]["amount"]);
+    setKind(stocks[first]["kind"]);
     setSymbol(first);
     setDisabled(false);
   }, [stocks])
@@ -26,7 +29,7 @@ export default function SellModal({ stocks, button, className }) {
 
     fetch("/api/stocks/sell", {
       method: "POST",
-      body: JSON.stringify({ symbol: symbol, amount: amount })
+      body: JSON.stringify({ symbol: symbol, amount: amount, kind: kind })
     }).then(res => res.json()).then(data => {
       if (data.type === "success") {
         setOpen(false);
@@ -51,17 +54,19 @@ export default function SellModal({ stocks, button, className }) {
 
   const changeSymbol = (e) => {
     setSymbol(e.target.value);
-    setMax(stocks[e.target.value]);
+    setMax(stocks[e.target.value]["amount"]);
+    setKind(stocks[e.target.value]["kind"]);
     
     if (amount > stocks[e.target.value]) {
-      setAmount(stocks[e.target.value]);
+      setAmount(stocks[e.target.value]["amount"]);
     }
   }
+
   const changeAmount = (e) => {    
     if (e.target.value > max) {
       setAmount(max);
     } else {
-      if (e.target.value.length > 1 && e.target.value[0] == "0") {
+      if (e.target.value.length > 1 && e.target.value[0] == "0" && kind === "stock") {
         let value = e.target.value.substring(e.target.value.length - 1);
         setAmount(Math.round(value));
         e.target.value = value;
@@ -69,7 +74,7 @@ export default function SellModal({ stocks, button, className }) {
         if (e.target.value == "") {
           setAmount(e.target.value);
         } else {
-          let value = Math.round(e.target.value);
+          let value = kind === "stock" ? Math.round(e.target.value) : decimalAdjust(e.target.value);
           if (value < 0) {
             setAmount(0);
             e.target.value = 0;
@@ -96,7 +101,7 @@ export default function SellModal({ stocks, button, className }) {
                 <div>Stock:</div>
                 <select value={symbol} onChange={changeSymbol} className="w-1/3 focus:outline-none text-white text-sm bg-slate-700">
                   {Object.keys(stocks).map((key, i) => {
-                    return <option value={key} key={i}>{key}</option>
+                    return <option value={key} key={i}>{capitalizeFirstLetter(key)}</option>
                   })}
                 </select>
                 <div className="opacity-50 mx-5">Max: {new Intl.NumberFormat().format(max)}</div>

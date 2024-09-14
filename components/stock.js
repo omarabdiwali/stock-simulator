@@ -1,8 +1,9 @@
+import { decimalAdjust } from "@/utils/common";
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react"
 
-export default function Stock({ symbol, desc }) {
+export default function Stock({ symbol, desc, id, kind="stock" }) {
   const { data: _, status } = useSession();
   const [disabled, setDisabled] = useState(true);
   const [amount, setAmount] = useState("");
@@ -16,11 +17,15 @@ export default function Stock({ symbol, desc }) {
     setDisabled(true);
     fetch('/api/price', {
       method: "POST",
-      body: JSON.stringify({ stock: symbol })
+      body: JSON.stringify({ stock: id, kind })
     }).then(res => res.json()).then(data => {
       setPrice(data.price);
       setPrevClose(data.previous);
-      setMax(Math.floor(data.cash / data.previous));
+      if (kind === "crypto") {
+        setMax(decimalAdjust(data.cash / data.price));
+      } else {
+        setMax(Math.floor(data.cash / data.price));
+      }
       setDisabled(false);
       setBuy(true)
     })
@@ -48,15 +53,15 @@ export default function Stock({ symbol, desc }) {
     if (e.target.value > max) {
       setAmount(max);
     } else {
-      if (e.target.value.length > 1 && e.target.value[0] == "0") {
+      if (e.target.value.length > 1 && e.target.value[0] == "0" && kind === "stock") {
         let value = e.target.value.substring(e.target.value.length - 1);
-        setAmount(Math.round(value));
+        kind === "stock" ? setAmount(Math.round(value)) : setAmount(decimalAdjust(value));
         e.target.value = value;
       } else {
         if (e.target.value == "") {
           setAmount(e.target.value);
         } else {
-          let value = Math.round(e.target.value);
+          let value = kind === "stock" ? Math.round(e.target.value) : decimalAdjust(e.target.value);
           if (value < 0) {
             setAmount(0);
             e.target.value = 0;
@@ -77,10 +82,14 @@ export default function Stock({ symbol, desc }) {
     setDisabled(true);
     fetch("/api/stocks/buy", {
       method: "POST",
-      body: JSON.stringify({ stock: symbol, amount: amount })
+      body: JSON.stringify({ stock: id, amount: amount, kind })
     }).then(res => res.json()).then(data => {
       enqueueSnackbar(data.answer, { autoHideDuration: 3000, variant: data.type });
-      setMax(Math.floor(data.cash / data.price));
+      if (kind === "crypto") {
+        setMax(decimalAdjust(data.cash / data.price));
+      } else {
+        setMax(Math.floor(data.cash / data.price));
+      }
       setPrice(data.price);
       setAmount("");
       setDisabled(false);
@@ -105,7 +114,7 @@ export default function Stock({ symbol, desc }) {
           {buy ?
             <div className="w-full">
               <input className="focus:border-light-blue-500 focus:ring-1 focus:ring-light-blue-500 focus:outline-none w-full text-sm text-black placeholder-gray-500 border border-gray-200 rounded-md py-2 pl-10 p-3" type="number" value={amount} onChange={changeAmount} max={max} min={0} aria-label="Amount" placeholder="Select Amount..." />
-              <div className="mt-3 opacity-60">Max: {new Intl.NumberFormat().format(max)}</div>
+              <div className="mt-3 opacity-60">Max: {max}</div>
             </div>
             : desc}
         </div>

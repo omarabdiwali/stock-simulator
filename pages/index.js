@@ -22,7 +22,7 @@ export default function Home() {
     const getPrices = async (stock) => {
       return await fetch("/api/price", {
         method: "POST",
-        body: JSON.stringify({ stock: stock.stock })
+        body: JSON.stringify({ stock: stock.stock, kind: stock.kind })
       }).then(res => res.json()).then(data => { return data; })
         .catch(err => console.error(err));
     }

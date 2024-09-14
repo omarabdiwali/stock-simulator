@@ -6,6 +6,7 @@ import Toolbar from "@/components/toolbar";
 import SellModal from "@/components/sellModal";
 import GetKey from "@/components/getKey";
 import Head from "next/head";
+import { capitalizeFirstLetter } from "@/utils/common";
 
 export default function Page() {
   const { data: _, status } = useSession();
@@ -47,7 +48,7 @@ export default function Page() {
     const getPrices = async (stock) => {
       return await fetch("/api/price", {
         method: "POST",
-        body: JSON.stringify({ stock: stock.stock })
+        body: JSON.stringify({ stock: stock.stock, kind: stock.kind })
       }).then(res => res.json()).then(data => { return data; })
         .catch(err => console.error(err));
     }
@@ -67,7 +68,9 @@ export default function Page() {
           let total = assets - prevTotal;
           let stockData = { stock: stock.stock, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: data.price, profit: total };
 
-          amountStock[stock.stock] = stock.amount;
+          amountStock[stock.stock] = {};
+          amountStock[stock.stock]["amount"] = stock.amount;
+          amountStock[stock.stock]["kind"] = stock.kind ? stock.kind : "stock";
           stockTableData.push(stockData);
           uniqStocks[stock.stock] = data.price
         }
@@ -90,7 +93,7 @@ export default function Page() {
         let stockData = { stock: stock.stock, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: price, profit: total };
 
         stockTableData.push(stockData);
-        amountStock[stock.stock] += stock.amount;
+        amountStock[stock.stock]["amount"] += stock.amount;
       }
 
       setStockAmount(amountStock);
@@ -206,7 +209,7 @@ export default function Page() {
           <table className="border-collapse table-auto w-full">
             <thead>
               <tr>
-                <th className="border-b dark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">Stock</th>
+                <th className="border-b dark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">Symbol</th>
                 <th className="border-b dark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">Date</th>
                 <th className="border-b dark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">Purchase Price</th>
                 <th className="border-b dark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">Current Price</th>
@@ -216,7 +219,7 @@ export default function Page() {
             </thead>
             <tbody className="bg-slate-200 dark:bg-slate-800">
               {showingStocks.map((stock, i) => {
-                // let alreadyIn = prev === stock.stock;
+                let alreadyIn = prev === stock.stock;
                 let positive = stock.profit >= 0;
                 
                 prev = stock.stock;
@@ -229,7 +232,7 @@ export default function Page() {
                 return (
                   <tr key={i}>
                     {/* <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? <a className="hover:underline" href={`/symbol/${stock.stock}`}>{stock.stock}</a> : ""}</td> */}
-                    <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{stock.stock}</td>
+                    <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? capitalizeFirstLetter(stock.stock) : ""}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{stock.date.toLocaleString()}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{new Intl.NumberFormat('en-us', { style: "currency", currency: "USD" }).format(stock.purPrice)}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{new Intl.NumberFormat('en-us', { style: "currency", currency: "USD" }).format(stock.curPrice)}</td>

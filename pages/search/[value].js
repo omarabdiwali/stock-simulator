@@ -11,6 +11,8 @@ export default function Page() {
   
   const [curValue, setCurValue] = useState("");
   const [stocks, setStocks] = useState([]);
+  const [crypto, setCrypto] = useState([]);
+  const [perfectMatch, setPerfectMatch] = useState([]);
   const [completed, setCompleted] = useState(false);
   const [noKey, setNoKey] = useState(false);
 
@@ -45,6 +47,8 @@ export default function Page() {
           body: JSON.stringify({ search: search })
         }).then(res => res.json()).then(data => {
           setStocks(data.stocks);
+          setPerfectMatch(data.perfectMatch);
+          setCrypto(data.crypto);
           setCompleted(true);
         }).catch(err => console.error(err));
       } else if (verified == 0) {
@@ -81,8 +85,19 @@ export default function Page() {
           </center>
           <div className="flex justify-center space-y-3 m-auto flex-wrap">
             <div></div>
+            {perfectMatch.map((item, i) => {
+              const isStock = item.kind ? false : true;
+              const desc = isStock ? item[1] : item.name;
+              const symbol = isStock ? item[0] : item.symbol;
+              const id = isStock ? item[0] : item.id;
+              const kind = isStock ? item[-1] : item.kind;
+              return <Stock key={`match-${i}`} desc={desc} symbol={symbol} id={id} kind={kind} />
+            })}
             {stocks.map((stock, i) => {
-              return <Stock key={i} desc={stock[1]} symbol={stock[0]} />
+              return <Stock key={`stock-${i}`} desc={stock[1]} symbol={stock[0]} id={stock[0]} kind={"stock"} />
+            })}
+            {crypto.map((coin, i) => {
+              return <Stock key={`coin-${i}`} desc={coin.name} symbol={coin.symbol} id={coin.id} kind={"crypto"} />
             })}
           </div>
         </>
