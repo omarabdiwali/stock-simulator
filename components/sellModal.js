@@ -12,7 +12,8 @@ export default function SellModal({ stocks, button, className }) {
 
   useEffect(() => {
     let first = Object.keys(stocks)[0];
-    setMax(stocks[first]["amount"]);
+    const maxValue = decimalAdjust(stocks[first]["amount"]);
+    setMax(maxValue);
     setKind(stocks[first]["kind"]);
     setSymbol(first);
     setDisabled(false);
@@ -32,16 +33,18 @@ export default function SellModal({ stocks, button, className }) {
       body: JSON.stringify({ symbol: symbol, amount: amount, kind: kind })
     }).then(res => res.json()).then(data => {
       if (data.type === "success") {
+        const maxValue = decimalAdjust(data.amount);
         setOpen(false);
         setAmount("");
         enqueueSnackbar(data.answer, { autoHideDuration: 3000, variant: data.type });
-        setMax(data.amount);
+        setMax(maxValue);
         setDisabled(false);
         setInterval(() => window.location.reload(), 1500);
       }
       else {
+        const maxValue = decimalAdjust(data.amount);
         enqueueSnackbar(data.answer, { autoHideDuration: 3000, variant: data.type });
-        setMax(data.amount);
+        setMax(maxValue);
         setDisabled(false);
       }
     }).catch(err => console.error(err));
@@ -53,12 +56,13 @@ export default function SellModal({ stocks, button, className }) {
   }
 
   const changeSymbol = (e) => {
+    const maxValue = decimalAdjust(stocks[e.target.value]["amount"]);
     setSymbol(e.target.value);
-    setMax(stocks[e.target.value]["amount"]);
+    setMax(maxValue);
     setKind(stocks[e.target.value]["kind"]);
-    
-    if (amount > stocks[e.target.value]) {
-      setAmount(stocks[e.target.value]["amount"]);
+        
+    if (amount > maxValue) {
+      setAmount(maxValue);
     }
   }
 

@@ -69,7 +69,7 @@ export default function Page() {
 
           amountStock[stock.stock] = {};
           amountStock[stock.stock]["amount"] = stock.amount;
-          amountStock[stock.stock]["kind"] = stock.kind ? stock.kind : "stock";
+          amountStock[stock.stock]["kind"] = stock.kind ?? "stock";
           stockTableData.push(stockData);
           uniqStocks[stock.stock] = data.price
         }
@@ -103,7 +103,7 @@ export default function Page() {
       if (data.apiKey) {
         let stocks = data.stocks;
         getAssetPrices(stocks).then(data => {
-          data.sort((stock, stock1) => stock.stock > stock1.stock ? 1 : -1);
+          data.sort((stock, stock1) => (stock.symbol ?? stock.stock) > (stock1.symbol ?? stock1.stock) ? 1 : -1);
           setAllStocks(data);
           setShowingStocks(data);
           setLoaded(true);
@@ -122,22 +122,25 @@ export default function Page() {
     setLoaded(false);
 
     prevStocks.sort((stock, stock1) => {
+      const stockName = stock.symbol ?? stock.stock;
+      const stockName1 = stock1.symbol ?? stock1.stock;
+
       if (e.target.value === "Symbol") {
-        return sortingOrder(stock.stock, stock1.stock, stock.date, stock1.date);
+        return sortingOrder(stockName, stockName1, stock.date, stock1.date);
       } else if (e.target.value === "Date") {
-        return sortingOrder(stock1.date, stock.date, stock.stock, stock1.stock);
+        return sortingOrder(stock1.date, stock.date, stockName, stockName1);
       } else if (e.target.value === "Purchase Amount") {
-        return sortingOrder(stock1.amount, stock.amount, stock.stock, stock1.stock);
+        return sortingOrder(stock1.amount, stock.amount, stockName, stockName1);
       } else if (e.target.value === "Company Amount") {
-        return sortingOrder(stockAmount[stock1.stock], stockAmount[stock.stock], stock.stock, stock1.stock);
+        return sortingOrder(stockAmount[stock1.stock], stockAmount[stock.stock], stockName, stockName1);
       } else if (e.target.value === "Purchase") {
-        return sortingOrder(stock1.purPrice, stock.purPrice, stock.stock, stock1.stock);
+        return sortingOrder(stock1.purPrice, stock.purPrice, stockName, stockName1);
       } else if (e.target.value === "Current") {
-        return sortingOrder(stock1.curPrice, stock.curPrice, stock.stock, stock1.stock);
+        return sortingOrder(stock1.curPrice, stock.curPrice, stockName, stockName1);
       } else if (e.target.value === "Profit") {
-        return sortingOrder(stock1.profit, stock.profit, stock.stock, stock1.stock);
+        return sortingOrder(stock1.profit, stock.profit, stockName, stockName1);
       } else {
-        return sortingOrder(stock1.amount * stock1.purPrice, stock.amount * stock.purPrice, stock.stock, stock1.stock);
+        return sortingOrder(stock1.amount * stock1.purPrice, stock.amount * stock.purPrice, stockName, stockName1);
       }
     })
 
@@ -154,7 +157,10 @@ export default function Page() {
   const onChange = (e) => {
     setCertStock(e.target.value);
     let prevStock = [...allStocks];
-    prevStock = prevStock.filter((stock) => stock.stock.indexOf(e.target.value.toUpperCase()) > -1);
+    prevStock = prevStock.filter((stock) => {
+      const stockName = stock.symbol ?? stock.stock;
+      return stockName.indexOf(e.target.value.toUpperCase()) > -1
+    });
     if (sortBy !== allSort) {
       setSortBy(allSort);
     }
