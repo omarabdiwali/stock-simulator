@@ -82,7 +82,7 @@ export default function Stock({ symbol, desc, id, kind="stock" }) {
     setDisabled(true);
     fetch("/api/stocks/buy", {
       method: "POST",
-      body: JSON.stringify({ stock: id, amount: amount, kind })
+      body: JSON.stringify({ stock: id, amount: amount, symbol, kind })
     }).then(res => res.json()).then(data => {
       enqueueSnackbar(data.answer, { autoHideDuration: 3000, variant: data.type });
       if (kind === "crypto") {

@@ -6,7 +6,6 @@ import Toolbar from "@/components/toolbar";
 import SellModal from "@/components/sellModal";
 import GetKey from "@/components/getKey";
 import Head from "next/head";
-import { capitalizeFirstLetter } from "@/utils/common";
 
 export default function Page() {
   const { data: _, status } = useSession();
@@ -66,7 +65,7 @@ export default function Page() {
           let assets = stock.amount * data.price;
           let prevTotal = stock.amount * stock.price;
           let total = assets - prevTotal;
-          let stockData = { stock: stock.stock, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: data.price, profit: total };
+          let stockData = { stock: stock.stock, symbol: stock.symbol, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: data.price, profit: total };
 
           amountStock[stock.stock] = {};
           amountStock[stock.stock]["amount"] = stock.amount;
@@ -90,7 +89,7 @@ export default function Page() {
         let assets = stock.amount * price;
         let prevTotal = stock.amount * stock.price;
         let total = assets - prevTotal;
-        let stockData = { stock: stock.stock, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: price, profit: total };
+        let stockData = { stock: stock.stock, symbol: stock.symbol, date: new Date(stock.date), amount: stock.amount, purPrice: stock.price, curPrice: price, profit: total };
 
         stockTableData.push(stockData);
         amountStock[stock.stock]["amount"] += stock.amount;
@@ -221,6 +220,7 @@ export default function Page() {
               {showingStocks.map((stock, i) => {
                 let alreadyIn = prev === stock.stock;
                 let positive = stock.profit >= 0;
+                let displayName = stock.symbol ?? stock.stock;
                 
                 prev = stock.stock;
                 total += stock.profit;
@@ -232,7 +232,7 @@ export default function Page() {
                 return (
                   <tr key={i}>
                     {/* <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? <a className="hover:underline" href={`/symbol/${stock.stock}`}>{stock.stock}</a> : ""}</td> */}
-                    <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? capitalizeFirstLetter(stock.stock) : ""}</td>
+                    <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{!alreadyIn ? displayName : ""}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{stock.date.toLocaleString()}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{new Intl.NumberFormat('en-us', { style: "currency", currency: "USD" }).format(stock.purPrice)}</td>
                     <td className="border-b border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400">{new Intl.NumberFormat('en-us', { style: "currency", currency: "USD" }).format(stock.curPrice)}</td>

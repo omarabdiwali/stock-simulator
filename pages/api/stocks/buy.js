@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { stock, kind, amount } = JSON.parse(req.body);
+  const { stock, kind, amount, symbol } = JSON.parse(req.body);
   const profile = session.user;
 
   let query = { email: profile.email };
@@ -32,11 +32,11 @@ export default async function handler(req, res) {
   if (kind == "crypto") {
     let priceData = await getCryptoPrice(stock);
     price = priceData[stock]['usd'];
-    stockData = { stock: stock, kind: "crypto", price: price, amount: amount, date: new Date() };
+    stockData = { stock, symbol, price, amount, date: new Date(), kind: "crypto" };
   } else {
     let priceData = await getStockPrice(stock, user.apiKey);
     price = priceData['c'];
-    stockData = { stock: stock, kind: "stock", price: price, amount: amount, date: new Date() };
+    stockData = { stock, price, amount, date: new Date(), kind: "stock" };
   }
 
   if (user.cash > price * amount) {

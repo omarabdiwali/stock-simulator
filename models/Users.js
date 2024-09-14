@@ -4,7 +4,16 @@ let UserSchema = new Schema({
   name: String,
   email: String,
   apiKey: String,
-  stocks: [{ stock: String, price: Number, amount: Number, date: Date, kind: {type: String, required: false} }],
+  stocks: [
+    { 
+      stock: String, 
+      price: Number, 
+      amount: Number, 
+      date: Date, 
+      kind: { type: String, required: false }, 
+      symbol: { type: String, required: false } 
+    }
+  ],
   cash: {
     type: Number,
     required: true,
