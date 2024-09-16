@@ -2,19 +2,10 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "./auth/[...nextauth]"
 import dbConnect from "@/utils/dbConnect";
 import Users from "@/models/Users";
+import { getStockPrice } from "@/utils/common";
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
-
-  const testKey = async (key) => {
-    return await fetch(`https://finnhub.io/api/v1/quote?symbol=AAPL&token=${key}`)
-      .then(resp => resp.json())
-      .then(data => { return data })
-      .catch(err => {
-        console.error(err);
-        res.status(500).json({ type: "error", answer: "Error fetching price." });
-      });
-  }
 
   if (!session || !req.body) {
     res.redirect("/");
@@ -36,7 +27,7 @@ export default async function handler(req, res) {
       return;
     }
     
-    let testData = await testKey(keyValue);
+    let testData = await getStockPrice("AAPL", keyValue);
     
     if (testData['error']) {
       res.status(200).json({ type: "error", answer: "Invalid API key." });

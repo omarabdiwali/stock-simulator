@@ -19,9 +19,7 @@ export default async function handler(req, res) {
   
   if (user) {
     if (user.apiKey) {
-      let priceData;
-      let previous;
-      let price;
+      let priceData, previous, price;
       if (kind == "crypto") {
         priceData = await getCryptoPrice(stock);
         price = priceData[stock]['usd'];

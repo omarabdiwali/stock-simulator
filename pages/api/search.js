@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       }
     })
       
-    reader.on('end',() => {
+    reader.on('end', () => {
       res.status(200).json({ stocks: csvData, crypto: cryptoCoins, perfectMatch });
       resolve();
     });

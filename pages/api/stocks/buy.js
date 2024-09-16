@@ -26,8 +26,7 @@ export default async function handler(req, res) {
   }
 
   const response = `Bought ${new Intl.NumberFormat().format(amount)} ${capitalizeFirstLetter(stock)}${getResponse(amount, kind)}`;
-  let stockData;
-  let price;
+  let stockData, price;
 
   if (kind == "crypto") {
     let priceData = await getCryptoPrice(stock);

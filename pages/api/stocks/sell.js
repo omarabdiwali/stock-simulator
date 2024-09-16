@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]"
 import dbConnect from "@/utils/dbConnect";
 import Users from "@/models/Users";
-import { decimalAdjust, getCryptoPrice, getResponse, getStockPrice, sellStock } from "@/utils/common";
+import { getCryptoPrice, getResponse, getStockPrice, sellStock } from "@/utils/common";
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);

@@ -1,13 +1,15 @@
+/** Gets the current price of a stock. */
 export const getStockPrice = async (symbol, key) => {
-    return await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${key}`)
-      .then(resp => resp.json())
-      .then(data => { return data })
-      .catch(err => {
-        console.error(err);
-        res.status(500).json({ type: "error", answer: "Error fetching price." });
-      });
-  }
+  return await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${key}`)
+    .then(resp => resp.json())
+    .then(data => { return data })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ type: "error", answer: "Error fetching price." });
+    });
+}
 
+/** Gets the current price of a cryptocurrency. */
 export const getCryptoPrice = async (symbol) => {
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${symbol}&vs_currencies=usd&include_24hr_change=true`;
     const options = {
@@ -21,6 +23,7 @@ export const getCryptoPrice = async (symbol) => {
     })
 }
 
+/** Floors the value to 4 decimal places. */
 export const decimalAdjust = (value) => {
     let type = "floor";
     let exp = -4;
@@ -37,10 +40,12 @@ export const decimalAdjust = (value) => {
     return Number(`${newMagnitude}e${+newExponent + exp}`);
 }
 
+/** Capitalize the first letter of a string. */
 export const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+/** Gets the response based on what it is and the amount. */
 export const getResponse = (amount, kind) => {
     if (amount > 1) {
       return kind === "crypto" ? "!" : " stocks!" 
@@ -49,6 +54,7 @@ export const getResponse = (amount, kind) => {
     }
 }
 
+/** Sells the indicated stock/cryptocurrency. */
 export const sellStock = (index, amount, stocks) => {
     let stockData = stocks[index];
 
@@ -64,6 +70,7 @@ export const sellStock = (index, amount, stocks) => {
     return [amount, stocks];
 }
 
+/** Filters the matching cryptocurrencies based on their market rank (shows those in the Top 1000). */
 export const getValidCoins = (allCoins, perfectMatch, search) => {
     const coins = [];
     const uniqSymbols = new Set();
@@ -88,6 +95,7 @@ export const getValidCoins = (allCoins, perfectMatch, search) => {
     return coins;
 }
 
+/** Gets the matching cryptocurrency based on the search value. */
 export const getCryptoCoins = async (search, match) => {
     const url = `https://api.coingecko.com/api/v3/search?query=${search}`;
     const options = {
